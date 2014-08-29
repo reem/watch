@@ -23,20 +23,25 @@ watch () {
     CTIME=$(date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s")
     while :; do
         # Check if any files have changed
-        for f in $FILES; do
+        for f in $(echo $FILES); do
             eval $(stat -s $f)
-            if [ $st_mtime -gt $CTIME ]; then
-                CTIME=$(date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s")
-                echo 'Retrying: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-                # Run the command
-                $CMD
-                # If it succeeded
-                if [ $? -eq 0 ]; then
-                    echo 'Succeeded: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-                # If it failed
-                else
-                    echo 'Failed: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+            if [ $? -eq 0 ]; then
+                if [ $st_mtime -gt $CTIME ]; then
+                    CTIME=$(date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s")
+                    echo 'Retrying: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+                    # Run the command
+                    eval $CMD
+                    # If it succeeded
+                    if [ $? -eq 0 ]; then
+                        echo 'Succeeded: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+                    # If it failed
+                    else
+                        echo 'Failed: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+                    fi
                 fi
+            else
+                echo "watch: $f is not a file."
+                return 1
             fi
         done
     done
