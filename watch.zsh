@@ -5,14 +5,10 @@ watch () {
     # $1: Command to execute
     # $*: Files to watch (can be a glob pattern)
 
-    set -o errexit
-    set -o nounset
-    # set -o xtrace
-
     if (( $# < 2 ))
     then
         echo "Usage: watch <CMD> <FILES>"
-        exit 1
+        return 1
     fi
 
     # The command to execute
