@@ -11,6 +11,23 @@ watch () {
         return 1
     fi
 
+    # Should watch log anything? 1 means no
+    SILENT=0
+
+    while getopts ":s" opt; do
+        case $opt in
+            s)
+                SILENT=1
+                ;;
+            \?)
+                echo "Invalid option: -$OPTARG" >&2
+                return 1
+                ;;
+        esac
+    done
+
+    shift $(($OPTIND-1))
+
     # The command to execute
     CMD=$1
     shift
@@ -19,7 +36,10 @@ watch () {
     FILES=$*;
 
     # Start the watch process
-    echo "Watching files.."
+    if [ $SILENT -eq 0 ]; then
+        echo "Watching files.."
+    fi
+
     CTIME=$(date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s")
     while :; do
         # Check if any files have changed
@@ -28,15 +48,24 @@ watch () {
             if [ $? -eq 0 ]; then
                 if [ $st_mtime -gt $CTIME ]; then
                     CTIME=$(date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s")
-                    echo 'Retrying: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+
+                    if [ $SILENT -eq 0 ]; then
+                        echo 'Retrying: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+                    fi
+
                     # Run the command
                     eval $CMD
+
                     # If it succeeded
                     if [ $? -eq 0 ]; then
-                        echo 'Succeeded: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+                        if [ $SILENT -eq 0 ]; then
+                            echo 'Succeeded: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+                        fi
                     # If it failed
                     else
-                        echo 'Failed: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+                        if [ $SILENT -eq 0 ]; then
+                            echo 'Failed: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+                        fi
                     fi
                 fi
             else
