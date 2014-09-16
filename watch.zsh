@@ -42,6 +42,7 @@ watch () {
 
     CTIME=$(date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s")
     while :; do
+        sleep 1
         # Check if any files have changed
         for f in $(echo $FILES); do
             eval $(stat -s $f)
