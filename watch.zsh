@@ -51,7 +51,7 @@ watch () {
         sleep 1
         # Check if any files have changed
         for f in $(echo $FILES); do
-            mtime=$(stat -c "%Y" $f)
+            mtime=$(eval stat $stat_opts $f)
             mtime=$(printf "%i" $mtime)
             if [ $? -eq 0 ]; then
                 if [ $mtime -gt $CTIME ]; then
